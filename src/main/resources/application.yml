@@ -1,0 +1,64 @@
+app:
+  fixer-api:
+    api-key: "64dbc69187ca8175cd11ecd65ef6c0d7"
+    endpoint: "http://data.fixer.io/api"
+    latest-endpoint: "${app.fixer-api.endpoint}/latest?access_key=${app.fixer-api.api-key}"
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: ['configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump']
+  endpoint:
+    health:
+      show-details: when_authorized
+      roles: 'ROLE_ADMIN'
+      probes:
+        enabled: true
+    jhimetrics:
+      enabled: true
+  info:
+    git:
+      mode: full
+  health:
+    group:
+      liveness:
+        include: livenessState
+      readiness:
+        include: readinessState
+    mail:
+      enabled: false # When using the MailService, configure an SMTP server and set this to true
+  metrics:
+    export:
+      # Prometheus is the default metrics backend
+      prometheus:
+        enabled: true
+        step: 60
+    enable:
+      http: true
+      jvm: true
+      logback: true
+      process: true
+      system: true
+    distribution:
+      percentiles-histogram:
+        all: true
+      percentiles:
+        all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
+    tags:
+      application: ${spring.application.name}
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+
+
+spring:
+  profiles:
+    active: dev
+logging:
+  level:
+    com:
+      example:
+        stockservice: DEBUG
