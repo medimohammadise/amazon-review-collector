@@ -1,6 +1,9 @@
+logging:
+  level:
+    com.example: DEBUG
 app:
   fixer-api:
-    api-key: "64dbc69187ca8175cd11ecd65ef6c0d7"
+    api-key: "25f62ae44d141f7ccc76b1db5f8ecf90"
     endpoint: "http://data.fixer.io/api"
     latest-endpoint: "${app.fixer-api.endpoint}/latest?access_key=${app.fixer-api.api-key}"
 management:
@@ -57,8 +60,3 @@ management:
 spring:
   profiles:
     active: dev
-logging:
-  level:
-    com:
-      example:
-        stockservice: DEBUG

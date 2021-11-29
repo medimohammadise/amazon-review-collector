@@ -17,12 +17,14 @@ import java.util.concurrent.ThreadLocalRandom
 @RestController
 class StockController {
     @Autowired
-    lateinit var webClient: WebClient;
+    lateinit var webClient: WebClient
     @Autowired
     lateinit var appConfiguration: AppConfiguration
     @GetMapping(value= ["/stock/{symbol}"])
     fun prices (@PathVariable symbol:String): Flux<ExchangeRateDTO> {
-        return webClient.get().uri{ uriBuilder-> uriBuilder.path("${appConfiguration.fixerApi.latestEndpoint}&symbols=\$symbol").build()}.retrieve().bodyToFlux(ExchangeRateDTO::class.java)
+        return webClient.get().uri{ uriBuilder-> uriBuilder.path("&symbols=${symbol}").build()}
+            .retrieve()
+            .bodyToFlux(ExchangeRateDTO::class.java)
 
       // return  Flux.interval(Duration.ofMinutes(5)).log().map { StockPrice(symbol,randomPrice(), LocalDateTime.now()) }.log()
     }

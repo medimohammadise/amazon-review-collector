@@ -38,3 +38,8 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.test {
+	// Use the built-in JUnit support of Gradle.
+	useJUnitPlatform()
+}
