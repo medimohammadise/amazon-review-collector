@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "2.5.0"
+	id("org.springframework.boot") version "2.6.1"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	kotlin("jvm") version "1.5.10"
 	kotlin("plugin.spring") version "1.5.10"
@@ -10,6 +10,7 @@ plugins {
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
+val dockerRepositoryName="mehdimohammadi/aws-dev"
 
 repositories {
 	mavenCentral()
@@ -42,4 +43,15 @@ tasks.withType<Test> {
 tasks.test {
 	// Use the built-in JUnit support of Gradle.
 	useJUnitPlatform()
+}
+tasks.bootBuildImage{
+	imageName="${dockerRepositoryName}:${version}"
+	isPublish=true
+	docker {
+		publishRegistry {
+			username = "mehdimohammadi"
+			password = "pooya123"
+		}
+
+	}
 }
