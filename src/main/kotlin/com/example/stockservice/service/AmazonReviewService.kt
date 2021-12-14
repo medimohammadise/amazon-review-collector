@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
+import java.util.function.Supplier
 import java.util.regex.Pattern
 
 @Service
@@ -49,27 +50,28 @@ class AmazonReviewService {
                     )
                     macther.find()*/
                     val reviewBody: String =
-                        c.select("div[id^=customer_review]").select("span[data-hook=review-body]").html()
+                        c.select("div[id^=customer_review] span[class=cr-original-review-content]").html()
                     val reviewTitle: String =
-                        c.select("div[id^=customer_review]").select("a[data-hook=review-title]").html()
+                        c.select("a[data-hook=review-title] span[class=cr-original-review-content]").html()
                     val reviewAuthor: String =
-                        c.select("div[id^=customer_review]").select("a[data-hook=review-author]").html()
-                    val reviewDate: String =
-                        c.select("div[id^=customer_review]").select("span[data-hook=review-date]").html()
+                        c.select("span[class=a-profile-name]").html()
+                    var reviewDate: String =
+                        c.select("span[data-hook=review-date]").html()
+                    val dateRegExpr="^[0-9][0-9]\\s(January|February|March|April|May|Jun|July|August|September|October|November|December)\\s\\d{4}\$"
+                    val pattern=Pattern.compile(dateRegExpr)
+                    val matcher=pattern.matcher(reviewDate)
                     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
-                    //val localReviewDate = LocalDate.parse(reviewDate, formatter)
-                    val localReviewDate= LocalDate.now()
+                    //val localReviewDate = LocalDate.parse( matcher.results().findFirst().orElse(null).toString(), formatter)
                    // if (localReviewDate.isAfter(startDate)) { TODO develop this logic later
                        // println("new review received")
                         reviews.add(
                             Review(
-                                "1",
-                                c.select("div[id^=customer_review]").attr("id").substring("customer_review-".length),
-                                c.select("div[id^=customer_review]").select("a[data-hook=review-title]").html(),
-                                c.select("div[id^=customer_review]").select("a[data-hook=review-author]").html(),
-                                c.select("div[id^=customer_review]").select("span[data-hook=review-body]").html(),
-                                localReviewDate,
-                                0.0
+                                productId = "1",
+                                customerProfileId = c.select("div[id^=customer_review]").attr("id").substring("customer_review-".length),
+                                title = reviewTitle,
+                                author = reviewAuthor,
+                                reviewText = reviewBody,
+                                reviewDate = LocalDate.now()
                             )
                         )
                     }

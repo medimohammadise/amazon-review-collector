@@ -9,7 +9,7 @@ data class CustomDocument(val url: String, val productId: String, var pageNumber
     var reviewElements: Elements;
     var document: Document = Optional.of(
         Jsoup.connect("$url/$productId?pageNumber=$pageNumber").ignoreContentType(true)
-            .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+            .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36")
             .referrer("http://www.google.com")
             .timeout(20000)
             .followRedirects(true).get()
