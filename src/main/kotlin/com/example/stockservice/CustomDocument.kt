@@ -16,7 +16,6 @@ data class CustomDocument(val url: String, val productId: String, var pageNumber
     ).orElse(null)
 
     init {
-        println("pageNumber$pageNumber")
         reviewElements = document.select("div[data-hook=review]")
         if (document?.select("div[id~=cm_cr-pagination_bar]").isEmpty()) pageNumber=0
     }

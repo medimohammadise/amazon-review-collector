@@ -1,6 +1,7 @@
 package com.example.stockservice
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.WebApplicationType
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,7 +21,7 @@ class StockController {
     lateinit var webClient: WebClient
     @Autowired
     lateinit var appConfiguration: AppConfiguration
-    @GetMapping(value= ["/stock/{symbol}"])
+    @GetMapping(value= ["/stock/{symbol}"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun prices (@PathVariable symbol:String): Flux<ExchangeRateDTO> {
         return webClient.get().uri{ uriBuilder-> uriBuilder.path("&symbols=${symbol}").build()}
             .retrieve()
