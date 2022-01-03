@@ -3,8 +3,8 @@ package com.example.stockservice.service
 import com.example.stockservice.CustomDocument
 import com.example.stockservice.DocumentFactory
 import com.example.stockservice.Review
-import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.FluxSink
@@ -12,12 +12,12 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
-import java.util.regex.Pattern
 
 @Service
 class AmazonReviewService {
+
+    private val log = LoggerFactory.getLogger(this.javaClass)
     fun runReviewExtraction(url: String, productID: String): Flux<Review> {
         var pageNumber = 1
         return Flux.create { sink: FluxSink<Review> ->
@@ -37,14 +37,14 @@ class AmazonReviewService {
 
                     }
                     val future: CompletableFuture<Pair<Int, List<Review>>> =
-                        CompletableFuture.supplyAsync(task1).thenApply { doc -> extractLatestReviews(doc) }
+                        CompletableFuture.supplyAsync(task1,).thenApply { doc -> extractLatestReviews(doc) }
 
                     future.whenComplete { reviewResult: Pair<Int, List<Review>>, exception: Throwable? ->
-                        println("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
+                        log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
                         if (exception == null)
                             reviewResult.second.forEach(sink::next)
                         else
-                            println("pageNumber= ${reviewResult.first} exception=${exception.message}")
+                            log.info("pageNumber= ${reviewResult.first} exception=${exception.message}")
                     }
                 }
 
@@ -107,7 +107,7 @@ class AmazonReviewService {
                 }
             }
         } catch (ex: Exception) {
-            println(ex.printStackTrace())
+            log.error(ex.message)
         }
         return Pair(pageDocument.pageNumber, reviews)
     }

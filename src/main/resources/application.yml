@@ -60,3 +60,5 @@ management:
 spring:
   profiles:
     active: dev
+  application:
+    name: amazon-review-collector

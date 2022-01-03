@@ -20,14 +20,5 @@ class AmazonReviewController(val amazonReviewService: AmazonReviewService) {
             url = "https://www.amazon.de/-/en/product-reviews",
             productID = "B094DJTGFN"
         )
-        /*futureReturnList.map {
-            it.whenComplete { list: List<Review>, exception: Throwable? ->
-                if (exception==null)
-                list.forEach(sink::next)
-                else exception?.let { it1 -> sink.error(it1).also { println(it) } }
-            }
-        }
-        sink.complete()
-    }*/
     }
 }
