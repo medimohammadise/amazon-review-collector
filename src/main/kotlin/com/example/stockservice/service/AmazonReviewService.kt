@@ -3,13 +3,15 @@ package com.example.stockservice.service
 import com.example.stockservice.CustomDocument
 import com.example.stockservice.DocumentFactory
 import com.example.stockservice.Review
-import com.example.stockservice.config.ExecuterService
+import io.sentry.Sentry
+import io.sentry.SentryTraceHeader
+import io.sentry.spring.tracing.SentrySpan
+import io.sentry.spring.tracing.SentryTransaction
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.FluxSink
@@ -30,6 +32,7 @@ class AmazonReviewService {
     @Autowired
     lateinit var executor: Executor
     private val log = LoggerFactory.getLogger(this.javaClass)
+    @SentryTransaction(operation = "crawling")
     fun runReviewExtraction(url: String, productID: String): Flux<Review> {
         var pageNumber = 1
 

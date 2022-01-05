@@ -76,3 +76,8 @@ spring:
       type: web
     service:
       name: amazon-crawler-service
+sentry:
+  dsn: https://72af93dcb3774b118fa58bfa923ce7e9@o1082414.ingest.sentry.io/6090963
+  trace-sample-rate: 1.0
+  send-default-pii: true
+

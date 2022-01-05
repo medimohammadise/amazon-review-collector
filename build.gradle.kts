@@ -13,6 +13,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 val dockerRepositoryName="mehdimohammadi/aws-dev"
 val springCloudVersion = "2021.0.0"
 val zipKinStarterVersion="2.2.8.RELEASE"  //TODO this version does not exist in BOM
+val sentryVersion="5.5.2"
 
 repositories {
 	mavenCentral()
@@ -30,6 +31,8 @@ dependencies {
 	implementation("org.jsoup:jsoup:1.11.3")
 	implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
 	implementation("org.springframework.cloud:spring-cloud-starter-zipkin:$zipKinStarterVersion")
+	implementation ("io.sentry:sentry-spring-boot-starter:$sentryVersion")
+	implementation ("io.sentry:sentry-logback:$sentryVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 

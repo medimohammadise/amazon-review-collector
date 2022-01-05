@@ -3,6 +3,7 @@ package com.example.stockservice.web
 import com.example.stockservice.Review
 import com.example.stockservice.service.AmazonReviewService
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -10,6 +11,7 @@ import reactor.core.publisher.Flux
 
 @RestController
 @RequestMapping("review")
+@CrossOrigin
 class AmazonReviewController(val amazonReviewService: AmazonReviewService) {
 
 
