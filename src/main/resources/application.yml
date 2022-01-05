@@ -1,6 +1,9 @@
 logging:
   level:
     com.example: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+
+
 app:
   fixer-api:
     api-key: "25f62ae44d141f7ccc76b1db5f8ecf90"
@@ -62,3 +65,14 @@ spring:
     active: dev
   application:
     name: amazon-review-collector
+  sleuth:
+    enabled: true
+    sampler:
+      probability: 1.0
+  zipkin:
+    base-url: http://localhost:9411/
+    enabled: true
+    sender:
+      type: web
+    service:
+      name: amazon-crawler-service

@@ -7,11 +7,12 @@ plugins {
 	kotlin("plugin.spring") version "1.5.10"
 }
 
-group = "com.example"
+group = "de.elegantsoftware"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 val dockerRepositoryName="mehdimohammadi/aws-dev"
 val springCloudVersion = "2021.0.0"
+val zipKinStarterVersion="2.2.8.RELEASE"  //TODO this version does not exist in BOM
 
 repositories {
 	mavenCentral()
@@ -28,6 +29,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("org.jsoup:jsoup:1.11.3")
 	implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
+	implementation("org.springframework.cloud:spring-cloud-starter-zipkin:$zipKinStarterVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 
