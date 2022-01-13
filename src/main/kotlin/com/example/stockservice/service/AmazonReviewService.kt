@@ -52,7 +52,7 @@ class AmazonReviewService {
                     }
                     //TODO may be first supplyAsync is not required
                     val future: CompletableFuture<Pair<Int, List<Review>>> =
-                        CompletableFuture.supplyAsync(task1, LazyTraceExecutor(beanFactory, executor, "doc")).thenApplyAsync ( {doc -> extractLatestReviews(doc)}, LazyTraceExecutor(beanFactory, executor, "crawler"))
+                        CompletableFuture.supplyAsync(task1, LazyTraceExecutor(beanFactory, executor, "doc")).thenApplyAsync ( {doc1 -> extractLatestReviews(doc1)}, LazyTraceExecutor(beanFactory, executor, "crawler"))
 
                     future.whenComplete { reviewResult: Pair<Int, List<Review>>, exception: Throwable? ->
                         log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
@@ -76,7 +76,6 @@ class AmazonReviewService {
         var allReviewsInPage: Elements
         var localReviewDate: LocalDate = LocalDate.now()
         try {
-            if (pageDocument != null) {
                 allReviewsInPage = pageDocument.reviewElements.select("div[data-hook=review]")
                 allReviewsInPage.forEach { c ->
                     val ratingText = c.select("i[data-hook*=review-star-rating] span[class=a-icon-alt]").html()
@@ -122,7 +121,6 @@ class AmazonReviewService {
                         )
                     )
                 }
-            }
         } catch (ex: Exception) {
             throw  RuntimeException(ex.message)
         }
