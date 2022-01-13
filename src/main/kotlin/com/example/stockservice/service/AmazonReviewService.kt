@@ -3,9 +3,6 @@ package com.example.stockservice.service
 import com.example.stockservice.CustomDocument
 import com.example.stockservice.DocumentFactory
 import com.example.stockservice.Review
-import io.sentry.Sentry
-import io.sentry.SentryTraceHeader
-import io.sentry.spring.tracing.SentrySpan
 import io.sentry.spring.tracing.SentryTransaction
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
@@ -21,6 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.function.Supplier
+import kotlin.RuntimeException
 
 
 @Service
@@ -60,8 +58,10 @@ class AmazonReviewService {
                         log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
                         if (exception == null)
                             reviewResult.second.forEach(sink::next)
-                        else
-                            log.info("pageNumber= ${reviewResult.first} exception=${exception.message}")
+                        else {
+                            log.error("pageNumber= ${reviewResult.first} exception=${exception.message}")
+                            sink.error(exception)
+                        }
                     }
                 }
 
@@ -94,9 +94,9 @@ class AmazonReviewService {
                     var reviewDateText: String =
                         c.select("span[data-hook=review-date]").html()
                     if (reviewDateText != "") {
-                        val pattern =
+                        val datePattern =
                             "\\d{1,2}\\s(January|February|March|April|May|June|July|August|September|October|November|December)\\s\\d{4}".toRegex()
-                        val match = pattern.find(reviewDateText)
+                        val match = datePattern.find(reviewDateText)
                         val formatter1 = DateTimeFormatter.ofPattern("dd MMMM yyyy")
                         val formatter2 = DateTimeFormatter.ofPattern("d MMMM yyyy")
                         localReviewDate = LocalDate.now()
@@ -106,7 +106,7 @@ class AmazonReviewService {
                             LocalDate.parse(match?.value, formatter2)
                         }
                     } else
-                        println("review date is empty at ${pageDocument.pageNumber} $reviewDateText")
+                        log.error("review date is empty at ${pageDocument.pageNumber} $reviewDateText")
                     // if (localReviewDate.isAfter(startDate)) { TODO develop this logic later
                     // println("new review received")
                     reviews.add(
@@ -124,7 +124,7 @@ class AmazonReviewService {
                 }
             }
         } catch (ex: Exception) {
-            log.error(ex.message)
+            throw  RuntimeException(ex.message)
         }
         return Pair(pageDocument.pageNumber, reviews)
     }
