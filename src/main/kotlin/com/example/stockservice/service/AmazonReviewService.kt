@@ -9,16 +9,20 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
+import org.springframework.http.codec.ServerSentEvent
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import reactor.core.publisher.FluxSink
+import reactor.core.publisher.Sinks
+import reactor.core.publisher.Sinks.Many
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Supplier
-import kotlin.RuntimeException
 
 
 @Service
@@ -27,14 +31,15 @@ class AmazonReviewService {
     @Autowired
     lateinit var beanFactory: BeanFactory
 
+    val sink: Many<Any> = Sinks.many().replay().all()
     @Autowired
     lateinit var executor: Executor
     private val log = LoggerFactory.getLogger(this.javaClass)
     @SentryTransaction(operation = "crawling")
-    fun runReviewExtraction(url: String, productID: String): Flux<Review> {
+    @Async
+    fun runReviewExtraction(url: String, productID: String): CompletableFuture<ReviewCollectionTask> {
         var pageNumber = 1
-
-        return Flux.create { sink: FluxSink<Review> ->
+        var numberOfSuccessfulEmits:AtomicInteger=AtomicInteger(0)
             do {
                 val doc =
                     DocumentFactory.factory {
@@ -56,21 +61,28 @@ class AmazonReviewService {
 
                     future.whenComplete { reviewResult: Pair<Int, List<Review>>, exception: Throwable? ->
                         log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
-                        if (exception == null)
-                            reviewResult.second.forEach(sink::next)
+                        if (exception == null){
+                            sink.tryEmitNext(reviewResult.second)
+                            numberOfSuccessfulEmits.incrementAndGet()
+                        }
                         else {
                             log.error("pageNumber= ${reviewResult.first} exception=${exception.message}")
-                            sink.error(exception)
+                            sink.tryEmitError(exception)
                         }
                     }
                 }
 
                 pageNumber++
             } while (doc?.pageNumber != 0)
-            sink.complete()
+        return AsyncResult(ReviewCollectionTask(pageNumber,numberOfSuccessfulEmits)).completable()
+    }
+    fun getReviews(): Flux<ServerSentEvent<Any>> {
+        return sink.asFlux().map { e: Any ->
+            ServerSentEvent.builder(
+                e
+            ).build()
         }
     }
-
     fun extractLatestReviews(pageDocument: CustomDocument): Pair<Int, List<Review>> {
         var reviews: MutableList<Review> = arrayListOf();
         var allReviewsInPage: Elements

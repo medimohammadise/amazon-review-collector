@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.konan.properties.Properties
 
 plugins {
 	id("org.springframework.boot") version "2.6.2"
@@ -15,7 +14,6 @@ val dockerRepositoryName="mehdimohammadi/aws-dev"
 val springCloudVersion = "2021.0.0"
 val zipKinStarterVersion="2.2.8.RELEASE"  //TODO this version does not exist in BOM
 val sentryVersion="5.5.2"
-private val versionProperties = Properties()
 
 repositories {
 	mavenCentral()
