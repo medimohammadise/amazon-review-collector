@@ -31,13 +31,13 @@ class AmazonReviewService {
     @Autowired
     lateinit var beanFactory: BeanFactory
 
-    val sink: Many<Any> = Sinks.many().replay().all()
+    val sink: Many<List<Review>> = Sinks.many().replay().all()
     @Autowired
     lateinit var executor: Executor
     private val log = LoggerFactory.getLogger(this.javaClass)
     @SentryTransaction(operation = "crawling")
     @Async
-    fun runReviewExtraction(url: String, productID: String): CompletableFuture<ReviewCollectionTask> {
+    fun runReviewExtraction(url: String, productID: String):  Flux<ServerSentEvent<List<Review>>> {
         var pageNumber = 1
         var numberOfSuccessfulEmits:AtomicInteger=AtomicInteger(0)
             do {
@@ -74,7 +74,9 @@ class AmazonReviewService {
 
                 pageNumber++
             } while (doc?.pageNumber != 0)
-        return AsyncResult(ReviewCollectionTask(pageNumber,numberOfSuccessfulEmits)).completable()
+        return sink.asFlux().map { e: List<Review> ->
+           ServerSentEvent.builder<List<Review>>(e).build()
+        }
     }
     fun getReviews(): Flux<ServerSentEvent<Any>> {
         return sink.asFlux().map { e: Any ->
