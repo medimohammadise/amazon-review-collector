@@ -1,10 +1,13 @@
 package com.example.stockservice.config
 
-import brave.sampler.Sampler
+//import brave.sampler.Sampler
+
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 
 @Configuration
@@ -25,9 +28,10 @@ class ExecuterService {
         return executor
     }
 
-    @Bean
+    /*@Bean
     fun defaultSampler(): Sampler? {
         return Sampler.ALWAYS_SAMPLE
-    }
+    }*/
+
 
 }

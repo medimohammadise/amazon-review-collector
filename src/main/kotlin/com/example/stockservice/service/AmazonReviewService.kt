@@ -8,10 +8,9 @@ import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
+//import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
@@ -36,8 +35,7 @@ class AmazonReviewService {
     lateinit var executor: Executor
     private val log = LoggerFactory.getLogger(this.javaClass)
     @SentryTransaction(operation = "crawling")
-    @Async
-    fun runReviewExtraction(url: String, productID: String):  Flux<ServerSentEvent<List<Review>>> {
+    fun runReviewExtraction(url: String, productID: String):  Flux<ServerSentEvent<Any>> {
         var pageNumber = 1
         var numberOfSuccessfulEmits:AtomicInteger=AtomicInteger(0)
             do {
@@ -57,7 +55,7 @@ class AmazonReviewService {
                     }
                     //TODO may be first supplyAsync is not required
                     val future: CompletableFuture<Pair<Int, List<Review>>> =
-                        CompletableFuture.supplyAsync(task1, LazyTraceExecutor(beanFactory, executor, "doc")).thenApplyAsync ( {doc1 -> extractLatestReviews(doc1)}, LazyTraceExecutor(beanFactory, executor, "crawler"))
+                        CompletableFuture.supplyAsync(task1, executor).thenApplyAsync ( {doc1 -> extractLatestReviews(doc1)}, executor)
 
                     future.whenComplete { reviewResult: Pair<Int, List<Review>>, exception: Throwable? ->
                         log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
@@ -74,8 +72,10 @@ class AmazonReviewService {
 
                 pageNumber++
             } while (doc?.pageNumber != 0)
-        return sink.asFlux().map { e: List<Review> ->
-           ServerSentEvent.builder<List<Review>>(e).build()
+            log.info("Number of successful emits: $numberOfSuccessfulEmits")
+        sink.tryEmitComplete()
+        return sink.asFlux().map { e:Any ->
+           ServerSentEvent.builder(e).build()
         }
     }
     fun getReviews(): Flux<ServerSentEvent<Any>> {

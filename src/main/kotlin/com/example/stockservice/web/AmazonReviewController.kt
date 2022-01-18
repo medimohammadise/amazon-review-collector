@@ -10,11 +10,11 @@ import reactor.core.publisher.Flux
 @Service
  class AmazonReviewController(private val amazonReviewService: AmazonReviewService){
     @Bean
-     fun collectReviews(): (String) -> (Flux<ServerSentEvent<List<Review>>>) {
+     fun collectReviews(): (Flux<String>) -> (Flux<ServerSentEvent<Any>>) {
         return {
             amazonReviewService.runReviewExtraction(
                 url = "https://www.amazon.de/-/en/product-reviews", //TODO this one need to be changed to channel
-                productID = it
+                productID = it.blockFirst()!!
             )
         }
     }

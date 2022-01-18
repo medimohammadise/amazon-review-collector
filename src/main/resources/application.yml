@@ -1,6 +1,8 @@
 logging:
   level:
-    com.example: DEBUG
+    org:
+      springframework:
+        cloud: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
 
 
