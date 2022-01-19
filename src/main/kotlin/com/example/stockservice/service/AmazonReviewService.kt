@@ -1,5 +1,6 @@
 package com.example.stockservice.service
 
+//import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
 import com.example.stockservice.CustomDocument
 import com.example.stockservice.DocumentFactory
 import com.example.stockservice.Review
@@ -8,9 +9,8 @@ import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
-//import org.springframework.cloud.sleuth.instrument.async.LazyTraceExecutor
+import org.springframework.context.annotation.Configuration
 import org.springframework.http.codec.ServerSentEvent
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
@@ -19,23 +19,19 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Supplier
 
 
-@Service
+@Configuration
 class AmazonReviewService {
 
-    @Autowired
-    lateinit var beanFactory: BeanFactory
+    val sink: Many<Review> = Sinks.many().replay().all()
 
-    val sink: Many<List<Review>> = Sinks.many().replay().all()
-    @Autowired
-    lateinit var executor: Executor
     private val log = LoggerFactory.getLogger(this.javaClass)
-    @SentryTransaction(operation = "crawling")
-    fun runReviewExtraction(url: String, productID: String):  Flux<ServerSentEvent<Any>> {
+   @SentryTransaction(operation = "crawling")
+    fun runReviewExtraction(url: String, productID: String):  Flux<Review> {
+       log.info("Collecting the reviews for productId {} ", productID)
         var pageNumber = 1
         var numberOfSuccessfulEmits:AtomicInteger=AtomicInteger(0)
             do {
@@ -55,12 +51,13 @@ class AmazonReviewService {
                     }
                     //TODO may be first supplyAsync is not required
                     val future: CompletableFuture<Pair<Int, List<Review>>> =
-                        CompletableFuture.supplyAsync(task1, executor).thenApplyAsync ( {doc1 -> extractLatestReviews(doc1)}, executor)
+                        CompletableFuture.supplyAsync(task1).thenApplyAsync ( {doc1 -> extractLatestReviews(doc1)})
 
                     future.whenComplete { reviewResult: Pair<Int, List<Review>>, exception: Throwable? ->
                         log.info("pageNumber= ${reviewResult.first} list= ${reviewResult.second.size}")
                         if (exception == null){
-                            sink.tryEmitNext(reviewResult.second)
+                            reviewResult.second.forEach{sink.tryEmitNext(it)}
+
                             numberOfSuccessfulEmits.incrementAndGet()
                         }
                         else {
@@ -74,17 +71,10 @@ class AmazonReviewService {
             } while (doc?.pageNumber != 0)
             log.info("Number of successful emits: $numberOfSuccessfulEmits")
         sink.tryEmitComplete()
-        return sink.asFlux().map { e:Any ->
-           ServerSentEvent.builder(e).build()
-        }
-    }
-    fun getReviews(): Flux<ServerSentEvent<Any>> {
-        return sink.asFlux().map { e: Any ->
-            ServerSentEvent.builder(
-                e
-            ).build()
-        }
-    }
+       return sink.asFlux()
+       }
+
+
     fun extractLatestReviews(pageDocument: CustomDocument): Pair<Int, List<Review>> {
         var reviews: MutableList<Review> = arrayListOf();
         var allReviewsInPage: Elements

@@ -4,7 +4,7 @@ logging:
       springframework:
         cloud: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
-
+    org.spring.kafka.config: DEBUG
 
 app:
   fixer-api:
@@ -78,6 +78,12 @@ spring:
       type: web
     service:
       name: amazon-crawler-service
+  cloud:
+    function:
+      definition: reverseReactive;collectReviews;
+      kafka:
+        binder:
+          replication-factor: 1
 sentry:
   dsn: https://72af93dcb3774b118fa58bfa923ce7e9@o1082414.ingest.sentry.io/6090963
   trace-sample-rate: 1.0

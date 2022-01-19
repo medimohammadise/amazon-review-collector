@@ -2,17 +2,18 @@ package com.example.stockservice.config
 
 //import brave.sampler.Sampler
 
+
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
+import org.springframework.context.annotation.Primary
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 
 @Configuration
 class ExecuterService {
 
+    @Primary
     @Bean
     fun getExecuterService() : Executor {
         val executor = ThreadPoolTaskExecutor()
@@ -27,7 +28,6 @@ class ExecuterService {
         executor.initialize()
         return executor
     }
-
     /*@Bean
     fun defaultSampler(): Sampler? {
         return Sampler.ALWAYS_SAMPLE
