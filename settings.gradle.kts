@@ -1,1 +1,1 @@
-rootProject.name = "stock-service"
+rootProject.name = "amazon-review-collector-service"

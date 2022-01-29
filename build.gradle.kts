@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "2.6.2"
+	id("org.springframework.boot") version "2.6.3"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	kotlin("jvm") version "1.5.10"
 	kotlin("plugin.spring") version "1.5.10"
@@ -24,8 +24,9 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-function-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-	implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit")
-	//implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+	//implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit")
+	implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -71,4 +72,8 @@ tasks.bootBuildImage{
 		}
 
 	}
+}
+
+springBoot{
+	buildInfo()
 }

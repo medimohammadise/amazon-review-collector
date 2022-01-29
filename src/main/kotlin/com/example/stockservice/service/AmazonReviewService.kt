@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Supplier
+import java.util.stream.Collectors
 
 
 @Configuration
@@ -30,10 +31,10 @@ class AmazonReviewService {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
    @SentryTransaction(operation = "crawling")
-    fun runReviewExtraction(url: String, productID: String):  Flux<Review> {
+    fun runReviewExtraction(url: String, productID: String):  List<Review> {
        log.info("Collecting the reviews for productId {} ", productID)
         var pageNumber = 1
-        var numberOfSuccessfulEmits:AtomicInteger=AtomicInteger(0)
+        val numberOfSuccessfulEmits=AtomicInteger(0)
             do {
                 val doc =
                     DocumentFactory.factory {
@@ -71,13 +72,13 @@ class AmazonReviewService {
             } while (doc?.pageNumber != 0)
             log.info("Number of successful emits: $numberOfSuccessfulEmits")
         sink.tryEmitComplete()
-       return sink.asFlux()
+       return sink.asFlux().toStream().collect(Collectors.toList())
        }
 
 
     fun extractLatestReviews(pageDocument: CustomDocument): Pair<Int, List<Review>> {
-        var reviews: MutableList<Review> = arrayListOf();
-        var allReviewsInPage: Elements
+        val reviews: MutableList<Review> = arrayListOf()
+        val allReviewsInPage: Elements
         var localReviewDate: LocalDate = LocalDate.now()
         try {
                 allReviewsInPage = pageDocument.reviewElements.select("div[data-hook=review]")
@@ -94,7 +95,7 @@ class AmazonReviewService {
                         c.select("a[data-hook=review-title] span[class=cr-original-review-content]").html()
                     val reviewAuthor: String =
                         c.select("span[class=a-profile-name]").html()
-                    var reviewDateText: String =
+                    val reviewDateText: String =
                         c.select("span[data-hook=review-date]").html()
                     if (reviewDateText != "") {
                         val datePattern =

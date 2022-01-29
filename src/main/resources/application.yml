@@ -1,3 +1,40 @@
+spring:
+  appllication:
+    name: ${project.rootProject.name}
+  profiles:
+    active: dev
+  application:
+    name: amazon-review-collector
+  sleuth:
+    enabled: true
+    sampler:
+      probability: 1.0
+  zipkin:
+    base-url: http://localhost:9411/
+    enabled: true
+    sender:
+      type: web
+    service:
+      name: amazon-crawler-service
+  cloud:
+    function:
+      definition: collectReviews;
+    stream:
+      kafka:
+        binder:
+          replication-factor: 1
+#    stream:
+#      bindings:
+#        collectReviews-in-0:
+#          destination: reviewInput
+#        collectReviews-out-0:
+#          destination: reviewOutput
+#          group: demo
+#        getReviews-in-0:
+#          destination: processReview
+#          group: demo
+
+
 logging:
   level:
     org:
@@ -5,12 +42,7 @@ logging:
         cloud: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
     org.spring.kafka.config: DEBUG
-
-app:
-  fixer-api:
-    api-key: "25f62ae44d141f7ccc76b1db5f8ecf90"
-    endpoint: "http://data.fixer.io/api"
-    latest-endpoint: "${app.fixer-api.endpoint}/latest?access_key=${app.fixer-api.api-key}"
+##Spring actuator
 management:
   endpoints:
     web:
@@ -61,29 +93,6 @@ management:
           autotime:
             enabled: true
 
-
-spring:
-  profiles:
-    active: dev
-  application:
-    name: amazon-review-collector
-  sleuth:
-    enabled: true
-    sampler:
-      probability: 1.0
-  zipkin:
-    base-url: http://localhost:9411/
-    enabled: true
-    sender:
-      type: web
-    service:
-      name: amazon-crawler-service
-  cloud:
-    function:
-      definition: reverseReactive;collectReviews;
-      kafka:
-        binder:
-          replication-factor: 1
 sentry:
   dsn: https://72af93dcb3774b118fa58bfa923ce7e9@o1082414.ingest.sentry.io/6090963
   trace-sample-rate: 1.0
