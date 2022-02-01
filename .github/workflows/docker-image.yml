@@ -3,13 +3,24 @@ name: CD Pipeline
 on:
   push:
     branches: [ master ]
-
+    
+  workflow_dispatch:  
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'manually run workflow tags'
 jobs:
 
   build-service:
     name: Build Amazon Review Collector Microservice
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          echo "Log level: ${{ github.event.inputs.logLevel }}"
+          echo "Tags: ${{ github.event.inputs.tags }}"
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Setup JDK
@@ -19,6 +30,8 @@ jobs:
           java-version: 17
       - name: Compile and test application
         run: |
-          cd amazon-review-collector
           chmod +x gradlew
-          ./gradlew build    
+          ./gradlew build  
+      - name: "Containerize and push image secret: ${{secrets.DOCKER_HUB_USER_NAME}} env:  ${{env.DOCKER_HUB_USER_NAME}}"
+        run: |
+           DOCKER_HUB_USER_NAME=${{secrets.DOCKER_HUB_USER_NAME}} DOCKER_HUB_PASSWORD=${{secrets.DOCKER_HUB_PASSWORD}} ./gradlew bootBuildImage
