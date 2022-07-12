@@ -1,7 +1,7 @@
 logging:
   level:
-    com.example: DEBUG
-    org.springframework.web.client.RestTemplate: DEBUG
+    com.example: INFO
+    org.springframework.web.client.RestTemplate: INFO
 
 
 app:
